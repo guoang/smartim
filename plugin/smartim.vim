@@ -53,6 +53,11 @@ endfunction
 
 call Smartim_start_debug()
 
+function! Smartim_GetDefault(channel, msg)
+  let b:saved_im = a:msg
+  call Smartim_debug_print('b:saved_im = ' . b:saved_im)
+endfunction
+
 function! Smartim_SelectDefault()
   call Smartim_debug_print('>>> Smartim_SelectDefault')
 
@@ -60,10 +65,9 @@ function! Smartim_SelectDefault()
     return
   endif
 
-  silent let b:saved_im = system(s:imselect_path)
-  silent call system(s:imselect_path . g:smartim_default)
+  call job_start(['/bin/bash', '-c', s:imselect_path], {'callback': "Smartim_GetDefault"})
+  call job_start(s:imselect_path . g:smartim_default)
 
-  call Smartim_debug_print('b:saved_im = ' . b:saved_im)
   call Smartim_debug_print('<<< Smartim_SelectDefault returned ' . v:shell_error)
 endfunction
 
@@ -75,7 +79,7 @@ function! Smartim_SelectSaved()
   endif
 
   if exists("b:saved_im")
-    silent call system(s:imselect_path . b:saved_im)
+    call job_start(s:imselect_path . b:saved_im)
     call Smartim_debug_print('b:saved_im = ' . b:saved_im)
     call Smartim_debug_print('<<< Smartim_SelectSaved returned ' . v:shell_error)
   else
