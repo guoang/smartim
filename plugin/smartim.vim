@@ -53,9 +53,13 @@ endfunction
 
 call Smartim_start_debug()
 
-function! Smartim_GetDefault(channel, msg)
+function! Smartim_GetCurrentCb(channel, msg)
+  call Smartim_debug_print('>>> Smartim_GetCurrentCb')
   let b:saved_im = a:msg
   call Smartim_debug_print('b:saved_im = ' . b:saved_im)
+  " select default after save current
+  call job_start(s:imselect_path . g:smartim_default)
+  call Smartim_debug_print('<<< Smartim_GetCurrentCb')
 endfunction
 
 function! Smartim_SelectDefault()
@@ -65,8 +69,7 @@ function! Smartim_SelectDefault()
     return
   endif
 
-  call job_start(['/bin/bash', '-c', s:imselect_path], {'callback': "Smartim_GetDefault"})
-  call job_start(s:imselect_path . g:smartim_default)
+  call job_start(['/bin/bash', '-c', s:imselect_path], {'callback': "Smartim_GetCurrentCb"})
 
   call Smartim_debug_print('<<< Smartim_SelectDefault returned ' . v:shell_error)
 endfunction
